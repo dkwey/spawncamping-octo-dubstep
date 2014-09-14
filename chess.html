@@ -8,6 +8,7 @@
     <title>chess test</title>
 	  <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
 	  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+	  <script src="scripts/jquery.ui.touch-punch.min.js"></script>
       <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular.min.js"></script>
 	  <script type='text/javascript' src="scripts/gametime.js"></script>
 	  
@@ -15,18 +16,40 @@
 		body {
 			font-family: Helvetica, Arial, sans-serif;
 		}
-		.boardTable{
-			text-align:center;
-			border: 3px solid black;
+		#wrapper{
 			margin: 30px auto;
+			width: 989px;
+		}
+		.log{
+			float:left;
+			border: 1px solid black;
+			width: 320px;
+			margin: 30px 10px;
 			border-spacing: 5px;
+			padding: 4px;
+			box-shadow: 2px 2px 3px #aaaaaa;
+		}
+		.boardTable{ 
+			float:left;
+			text-align: center;
+			border: 3px solid black;
+			border-spacing: 5px;
+			margin: 30px 10px;
+						box-shadow: 2px 2px 3px #aaaaaa;
 			padding: 4px;
 		}
 				
 		td{
-			font-size: 3.6em;
-			width:75px; height:75px; 
-			padding: 5px;
+			font-size: 40px;
+			line-height: 40px;
+			width:40px; height:40px; 
+			padding: 15px;
+			
+			-webkit-user-select: none; /* Chrome/Safari */        
+			-moz-user-select: none; /* Firefox */
+			-ms-user-select: none; /* IE10+ */
+			
+			cursor: pointer;
 		}
 		.black-piece{ 
 			color: black;
@@ -37,24 +60,49 @@
 			text-shadow: #000 1px 1px
 		}
 		.dragme{
+			cursor: pointer;
 			/*background-color: red;*/
+		}
+		.snapto{
+			margin: 0px auto;
+			width: 100%; height: 100%;
+		}
+		.ui-state-hover{
+
 		}
 
 		</style>
 		
-		<script> //do some jquery
-		$(function() {
-			
+  <script>
+  $(function() {
+
+    $( ".dragme" ).draggable({opacity: 0.6,snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid" });
+	$( ".dragme" ).on('dragstart',function(e,ui){
+		if(ui.helper.data('id') === undefined) {
+			ui.helper.data('start',e.delegateTarget.parentNode.id);
+		    ui.helper.data('id',e.delegateTarget.id);
 		}
-		</script>
-		
+	});
+
+	$( ".snapto" ).droppable({hoverClass: "ui-state-hover"});
+	$( ".snapto" ).on('drop',function(e,ui){
+		ui.helper.data('start',e.delegateTarget.id);
+	});
+  });
+  </script>
   </head>
-  <body ng-app>
-<table class="boardTable" ng-controller="TableCtrl">
+  <body ng-app=chessModule>
+<div ng-controller="TableCtrl" id="wrapper">
+<table class="boardTable" >
 <tr ng-repeat="row in data" >
-<td ng-repeat="cell in row" class="{{cell.color}}-piece snapto" style="background-color: {{cell.bgcolor}}"><div ng-if="cell.valStr!=chessSymbol.empty" class="dragme" id="{{cell.uid}}">{{cell.valStr}}</div></td>
+<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="piece-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
 </tr>
 </table>
+<div class = "log" ng-model="logData">
+  {{logText}}
+</div>
+  
+</div>
   </body>
 </html>
 
