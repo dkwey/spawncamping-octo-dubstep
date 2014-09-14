@@ -1,47 +1,72 @@
-var size = 25
-function colorCode (newr,newg,newb)
-{
-	this.dir = [1,1,1]
-	this.code = [newr,newg,newb]
+
+var chessSymbol = { //unicode table for pieces
+
+			 king: "♚",
+			 queen: "♛",
+			 rook: "♜",
+			 bishop: "♝",
+			 knight: "♞",
+			 pawn: "♟",
+			 empty: ""
+	 
 }
 
-colorCode.prototype.strobe = function(kr,kg,kb) {
-	for(i=0;i<3;i++){
-		if(this.code[i] >= 255) this.dir[i]=-1
-		else if(this.code[i] <= 0) this.dir[i] = 1
-	}
+var Piece = function(color, type){
+	this.color = color;
+	this.type = type;
+	this.symbol = chessSymbol[type];
+}
+
+var emptyPiece = new Piece("white","empty")
+
+//local board copy
+var BoardState = {
+	TurnState: "White",
+	Board: [[new Piece("white","rook"), new Piece("white","knight"), new Piece("white","bishop"), new Piece("white","queen"), new Piece("white","king"), new Piece("white","bishop"), new Piece("white","knight"), new Piece("white","rook")],
+		    [new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn") ],
+			[emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece],
+			[emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece],
+			[emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece],
+			[emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece,emptyPiece],
+			[new Piece("black","pawn"), new Piece("black","pawn"), new Piece("black","pawn"), new Piece("black","pawn"), new Piece("black","pawn"), new Piece("black","pawn"), new Piece("black","pawn"), new Piece("black","pawn") ],
+			[new Piece("black","rook"), new Piece("black","knight"), new Piece("black","bishop"), new Piece("black","queen"), new Piece("black","king"), new Piece("black","bishop"), new Piece("black","knight"), new Piece("black","rook")]]
 	
-	this.code[0]+= kr*this.dir[0]
-	this.code[1]+= kg*this.dir[1]
-	this.code[2]+= kb*this.dir[2]
 }
 
+//build table
 var TableCtrl = function($scope,$interval)
 {
-	$scope.color = new colorCode(0,0,0)
-	$scope.inc = 10;
-	
+var square;
+var piece;
 $scope.data= []
-for(i=0; i<size; i++)
+for(i=0; i<8; i++)
 	$scope.data[i] = []
 
-for(y=0; y<size; y++)
+for(y=0; y<8; y++)
 {
-	for(x=0;x<size;x++)
+	for(x=0;x<8;x++)
 	{
-		$scope.data[y][x] = { valStr: x + "," + y,
-							  initX: (x * (255/size))|0,
-							  initY: (y * (255/size))|0
+		if((x + y)%2)
+		{
+			square = "Gray"
+		}
+		else{
+			square = "Silver"
+		}
+			
+	    piece = BoardState.Board[y][x]
+		$scope.data[y][x] = { 
+							  uid: (x*8 + y),
+							  valStr: piece.symbol,
+							  bgcolor: square,
+							  color: piece.color
 		}
 	}
 }	
 
 
-	$interval(function(){
-		$scope.color.strobe(5,10,25)
-		$scope.rval = $scope.color.code[0]
-		$scope.gval = $scope.color.code[1]
-		$scope.bval = $scope.color.code[2]
-	},40);
+/*	$interval(function(){
+
+	},40); */
 	
 }

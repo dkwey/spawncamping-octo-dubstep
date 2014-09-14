@@ -1,0 +1,60 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- Favicon made by Freepik from www.flaticon.com licensed under CC BY 3.0 -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>chess test</title>
+	  <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+	  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+      <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular.min.js"></script>
+	  <script type='text/javascript' src="scripts/gametime.js"></script>
+	  
+	  <style>
+		body {
+			font-family: Helvetica, Arial, sans-serif;
+		}
+		.boardTable{
+			text-align:center;
+			border: 3px solid black;
+			margin: 30px auto;
+			border-spacing: 5px;
+			padding: 4px;
+		}
+				
+		td{
+			font-size: 3.6em;
+			width:75px; height:75px; 
+			padding: 5px;
+		}
+		.black-piece{ 
+			color: black;
+			text-shadow: #DDD 1px 1px
+		}
+		.white-piece{
+			color: white;
+			text-shadow: #000 1px 1px
+		}
+		.dragme{
+			/*background-color: red;*/
+		}
+
+		</style>
+		
+		<script> //do some jquery
+		$(function() {
+			
+		}
+		</script>
+		
+  </head>
+  <body ng-app>
+<table class="boardTable" ng-controller="TableCtrl">
+<tr ng-repeat="row in data" >
+<td ng-repeat="cell in row" class="{{cell.color}}-piece snapto" style="background-color: {{cell.bgcolor}}"><div ng-if="cell.valStr!=chessSymbol.empty" class="dragme" id="{{cell.uid}}">{{cell.valStr}}</div></td>
+</tr>
+</table>
+  </body>
+</html>
+

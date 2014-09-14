@@ -1,16 +1,17 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>strobe test</title>
-      <script type='text/javascript' src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
       <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular.min.js"></script>
-	  <script type='text/javascript' src="scripts/gametime.js"></script>
+	  <script type='text/javascript' src="scripts/strobe.js"></script>
   </head>
-  <body ng-app>
-<table ng-controller="TableCtrl">
+  <body ng-app style="background-color:black;">
+<table ng-controller="strobeCtrl">
 <tr ng-repeat="row in data" >
-<td ng-repeat="col in row" style="color:rgb({{col.initX + rval}},{{ col.initY + gval}},{{bval}})" >({{col.valStr}})</td>
+<td ng-repeat="col in row track by col.valStr" style="color:rgb({{col.initX + rval}},{{ col.initY + gval}},{{bval}})" >({{col.valStr}})</td>
 </tr>
 </table>
   </body>
