@@ -25,19 +25,37 @@
 			margin: 30px auto;
 			width: 989px;
 		}
-		.log{
+		.chatbox
+		{
 			float:left;
 			border: 1px solid black;
 			width: 320px;
-			height:700px;
-			overflow:auto;
 			margin: 30px 10px;
 			border-spacing: 5px;
 			padding: 4px;
 			box-shadow: 2px 2px 3px #aaaaaa;
 		}
+		.log{
+			height:700px;
+			overflow:auto;
+		}
+		#typehere{
+			margin: 0px -4px;
+			font-size: 12px;
+			height:20px;
+			padding: 3px 5px;
+			width:316px;
+			border: none;
+		}
+		#chatbox-sep{
+			height:1px;
+			margin: 0px;
+			padding: 0;
+			width:320px;
+			border-top: 1px solid #BBB;
+		}
 		
-		.log ul{
+		.chatbox ul{
 			list-style-type: circle;
 			font-size:12px;
 			margin-left: 10px;
@@ -78,6 +96,7 @@
 		}
 		.dragme{
 			cursor: pointer;
+			position:absolute;
 			/*background-color: red;*/
 		}
 		.snapto{
@@ -111,7 +130,15 @@
   <script>
   $(function() {
 
-    $( ".dragme" ).draggable({opacity: 0.6,snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid" });
+	
+    $( ".dragme" ).draggable({opacity: 0.6,
+						snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid", 
+						create: function(e,ui){     
+							var jObj = $("#"+e.delegateTarget.id);
+							jObj.css("top",jObj.position().top).css("left",jObj.position().left); 
+						} 
+	});
+	
 	$( ".dragme" ).on('dragstart',function(e,ui){
 		if(ui.helper.data('id') === undefined) {
 			ui.helper.data('start',e.delegateTarget.parentNode.id);
@@ -121,7 +148,7 @@
 
 	$( ".snapto" ).droppable({hoverClass: "ui-state-hover"});
 	$( ".snapto" ).on('drop',function(e,ui){
-		ui.helper.data('start',e.delegateTarget.id);
+		ui.helper.data('start',e.delegateTarget.id);		
 	});
   });
   </script>
@@ -133,12 +160,16 @@
 <td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.col}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
 </tr>
 </table>
-<div autoscroll class = "log">
-<ul>
-<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
-</ul>
-</div>
-  
+	<div class = "chatbox">
+		<div autoscroll class = "log">
+		<ul>
+		<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
+		</ul>
+		</div>
+		<div id="chatbox-sep"></div>
+		<input ng-model="typedInChat" type="textbox" id="typehere" ng-keypress="checkKeyPress($event)"></input>
+	</div>
+	  
 </div>
   </body>
 </html>

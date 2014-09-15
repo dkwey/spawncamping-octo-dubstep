@@ -49,5 +49,4 @@ app.directive( 'autoscroll', function() {
         }
     }
 
-} )
-	
+} );

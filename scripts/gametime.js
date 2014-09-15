@@ -17,7 +17,18 @@ var Piece = function(color, type){
 	this.symbol = chessSymbol[type];
 }
 
-var emptyPiece = new Piece("empty","empty")
+var autoMovePiece = function(p, e) //jquery handler to move piece
+{
+	p.animate({
+		//css
+		top:e.position().top,
+		left:e.position().left
+		}, 300, function() {
+			//done
+		});
+}
+
+var emptyPiece = new Piece("empty","empty");
 
 app = angular.module('chessModule', ['ngAnimate']);
 
@@ -27,7 +38,8 @@ app.controller('TableCtrl', function($scope,socket) {
 		var column = "ABCDEFGH";
 		var square;
 		$scope.pickeduppiece = emptyPiece;
-
+		$scope.username = "";
+		$scope.typedInChat = "";
 			
 		socket.on('news', function(data){
 			console.log(data);
@@ -36,8 +48,22 @@ app.controller('TableCtrl', function($scope,socket) {
 		});
 		
 		socket.on('logUpdate', function(data){
-			$scope.eventlog.Data.push(data);
-			socket.emit('ack-event', "ok");
+			$scope.eventlog.Data.push("Someone " + data);
+			//socket.emit('ack-event', "ok");
+		});
+
+		
+		socket.on('game:move_sync', function(data){
+				var pieceObj = $("#"+data["piece"]);
+				var remoteCellObj = $("#"+data["dropped"]);
+				console.log (":)");
+				console.log(data);
+				autoMovePiece(pieceObj, remoteCellObj);
+		});
+		
+		socket.on('chat:push', function(data){
+			$scope.eventlog.Data.push(data["user"] +": " + data["message"]);
+			//socket.emit('ack-event', "ok");
 		});
 		
 		socket.on('user:connected', function(data){
@@ -54,14 +80,15 @@ app.controller('TableCtrl', function($scope,socket) {
 			Data: [],
 		}
 		$scope.AppendLog = function(newText){
-			$scope.eventlog.Data.push(newText);
-			socket.emit('droppedItem', newText);
+			$scope.eventlog.Data.push("You " + newText);
+			socket.emit('log:push', newText);
 		}
 		
-		$scope.PickUp = function(pc,origin)
+		$scope.PickUp = function(pc,org)
 		{
-			$scope.pickeduppiece = pc.split('-')[2] + "_" + origin.slice(-2);
-			$scope.logData+= $scope.pickeduppiece
+			$scope.pickeduppiece = { piece: pc, origin: org };
+			console.log($scope.pickeduppiece);
+			$scope.logData+= pc.split('-')[0] + "_" + pc.split('-')[2] + "_" + org.slice(-2)
 		}
 		
 		$scope.MoveTo = function(dest)
@@ -69,13 +96,14 @@ app.controller('TableCtrl', function($scope,socket) {
 			var start; var end; var x; var y;
 			if($scope.pickeduppiece != emptyPiece)
 			{
-				start = $scope.pickeduppiece.slice(-2);
+				start = $scope.pickeduppiece['origin'].slice(-2);
 				x = column.indexOf(start[0]);
 				y = start[1] - 1;
 				end = dest.slice(-2);
 				x = column.indexOf(end[0]);
 				y = end[1] - 1;
 				if(start!=end) $scope.AppendLog("moved "+ start + " to " + end);
+		        socket.emit('game:move_complete',{ piece: $scope.pickeduppiece.piece, origin: $scope.pickeduppiece.origin, dropped: dest });
 			}
 			
 			$scope.pickeduppiece = emptyPiece;
@@ -86,6 +114,7 @@ app.controller('TableCtrl', function($scope,socket) {
 		};
 		
 		$scope.BoardState = {
+			id: 0,
 			TurnState: "White",
 			Board: [[new Piece("white","rook"), new Piece("white","knight"), new Piece("white","bishop"), new Piece("white","queen"), new Piece("white","king"), new Piece("white","bishop"), new Piece("white","knight"), new Piece("white","rook")],
 					[new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn"), new Piece("white","pawn") ],
@@ -98,6 +127,15 @@ app.controller('TableCtrl', function($scope,socket) {
 			
 		}
 		$scope.data= []
+
+
+		socket.on('game:board_sync', function(sData){
+			console.log("Synced");
+			$scope.BoardState = sData;
+			
+			
+		});
+	
 		for(i=0; i<8; i++)
 			$scope.data[i] = []
 
@@ -126,5 +164,12 @@ app.controller('TableCtrl', function($scope,socket) {
 	$scope.$watch('BoardState.Board', function () {
 		$( ".dragme" ).draggable({opacity: 0.6,snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid" });
     },true);
+	
+	$scope.checkKeyPress = function(e){
+		if(e.which == 13 && $scope.typedInChat != ""){
+			socket.emit('chat:incoming', {message: $scope.typedInChat});
+			$scope.typedInChat = "";
+		}
+	};
 		
 	});
