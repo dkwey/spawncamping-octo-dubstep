@@ -19,89 +19,34 @@ var Piece = function(color, type){
 
 var emptyPiece = new Piece("empty","empty")
 
-//local board copy
-
-
 app = angular.module('chessModule', ['ngAnimate']);
-//chesspiece
-app.directive('chesspiece', ['$document', function($document) {
-    return function(scope, element, attr) {
-      var startX, startY, x = 0, y = 0;
 
-      element.on('dragcreate', function(event) {
-		//pieces redrawn
-      });
-	  
-	  element.on('dragstart', function(event,ui) {
-		//notify movement, set metadata
-		var piece = element[0].id;
-		var parent = ($(ui.helper).data('start') === undefined) ? element[0].parentNode.id : $(ui.helper).data('start');
-
-		scope.$apply(function(){
-			scope.PickUp(piece,parent);
-			scope.AppendLog("picked up a "+ piece);
-		})
-      });
-	  
-    };
-}]);
-  
-app.directive('boardspace', ['$document', function($document) {
-    return function(scope, element, attr) {
-      var startX = 0, startY = 0, x = 0, y = 0;
-
-      element.on('drop', function(event,ui) {
-		//piece dropped
-		var endPoint = element[0].id;
-		
-		//alert($(ui.helper).data('start'))
-		scope.$apply(function(){
-			scope.MoveTo(endPoint);
-			scope.AppendLog(" dropped on " + endPoint);
-		})
-      });
-    };
-  }]); 
- 
-app.directive( 'autoscroll', function() {
-
-    return {
-        link: function( scope, elem, attrs ) {
-
-            scope.$watch( function() {
-                elem.scrollTop(elem[0].scrollHeight);
-            } );
-        }
-    }
-
-} )
-	
- app.filter('reverse', function() {
-  return function(items) {
-    return items.slice().reverse();
-  };
-}); 
-
- app.filter('onlyShowLast', function() {
-  return function(items, showAmount) {
-    return items.slice(-showAmount);
-  };
-}); 
-
- app.filter('popOffLast', function() {
-  return function(items, showAmount) {
-  if(items.length > showAmount){
-	items.shift();
-  }
-    return items
-  };
-}); 
 
 //build table
-app.controller('TableCtrl', function($scope,$interval) {
+app.controller('TableCtrl', function($scope,socket) {
 		var column = "ABCDEFGH";
 		var square;
 		$scope.pickeduppiece = emptyPiece;
+
+			
+		socket.on('news', function(data){
+			console.log(data);
+			$scope.eventlog.Data.push(data["hello"])
+			socket.emit('ack-event', "ok");
+		});
+		
+		socket.on('logUpdate', function(data){
+			$scope.eventlog.Data.push(data);
+			socket.emit('ack-event', "ok");
+		});
+		
+		socket.on('user:connected', function(data){
+			$scope.eventlog.Data.push(data + " users now connected.");
+		});
+		
+		socket.on('user:disconnect', function(data){
+			$scope.eventlog.Data.push(data + " users now connected.");
+		});
 		
 
 		$scope.logText = "";
@@ -110,6 +55,7 @@ app.controller('TableCtrl', function($scope,$interval) {
 		}
 		$scope.AppendLog = function(newText){
 			$scope.eventlog.Data.push(newText);
+			socket.emit('droppedItem', newText);
 		}
 		
 		$scope.PickUp = function(pc,origin)
@@ -129,7 +75,7 @@ app.controller('TableCtrl', function($scope,$interval) {
 				end = dest.slice(-2);
 				x = column.indexOf(end[0]);
 				y = end[1] - 1;
-				$scope.AppendLog(" moved "+ start + " to " + end);
+				if(start!=end) $scope.AppendLog("moved "+ start + " to " + end);
 			}
 			
 			$scope.pickeduppiece = emptyPiece;

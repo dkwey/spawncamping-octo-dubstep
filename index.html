@@ -4,16 +4,17 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>welpcome</title>
-      <script type='text/javascript' src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-      <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular.min.js"></script>
-	  <script type='text/javascript' src="scripts/gametime.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+<script>
+  var socket = io.connect('http://dkwey.com:8080');
+  socket.on('news', function(data) {
+    console.log(data);
+    socket.emit('my other event', {my: 'asdfasfs'});
+});
+</script>
   </head>
-  <body ng-app>
-<table ng-controller="TableCtrl">
-<tr ng-repeat="row in data" >
-<td ng-repeat="col in row" style="color:rgb({{col.initX + rval}},{{ col.initY + gval}},{{bval}})" >({{col.valStr}})</td>
-</tr>
-</table>
+  <body>
+
   </body>
 </html>
 

@@ -10,8 +10,12 @@
 	  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
 	  <script src="scripts/jquery.ui.touch-punch.min.js"></script>
       <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular.min.js"></script>
-	   <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular-animate.min.js"></script>
+	  <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular-animate.min.js"></script>
+	  <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
 	  <script type='text/javascript' src="scripts/gametime.js"></script>
+	  <script type='text/javascript' src="scripts/gt_directives.js"></script>
+	  <script type='text/javascript' src="scripts/gt_filters.js"></script>
+	  <script type='text/javascript' src="scripts/socket.js"></script>
 	  
 	  <style>
 		body {
@@ -25,13 +29,23 @@
 			float:left;
 			border: 1px solid black;
 			width: 320px;
-			height:500px;
+			height:700px;
 			overflow:auto;
 			margin: 30px 10px;
 			border-spacing: 5px;
 			padding: 4px;
 			box-shadow: 2px 2px 3px #aaaaaa;
 		}
+		
+		.log ul{
+			list-style-type: circle;
+			font-size:12px;
+			margin-left: 10px;
+			margin-right: 0px;
+			padding-left: 20px;
+			padding-right: 20px;
+		}
+		
 		.boardTable{ 
 			float:left;
 			text-align: center;
@@ -74,19 +88,24 @@
 
 		}
 
-.reveal-animation.ng-enter {
-  -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
-  animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
-}
-@-webkit-keyframes enter_sequence {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-@keyframes enter_sequence {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-
+		.animate.ng-enter {
+		  -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
+		  animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+		}
+		.animate.ng-leave{
+		  -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
+		  animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+		}
+		
+		@-webkit-keyframes enter_sequence {
+		  from { background-color: red; opacity:.1; }
+		  to { opacity:1; }
+		}
+		@keyframes enter_sequence {
+		  from { background-color: red; opacity:0; }
+		  to { opacity:1; }
+		}
+		
 		</style>
 		
   <script>
@@ -116,7 +135,7 @@
 </table>
 <div autoscroll class = "log">
 <ul>
-<li class="reveal-animation" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
+<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
 </ul>
 </div>
   
