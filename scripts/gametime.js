@@ -22,7 +22,7 @@ var emptyPiece = new Piece("empty","empty")
 //local board copy
 
 
-app = angular.module('chessModule', []);
+app = angular.module('chessModule', ['ngAnimate']);
 //chesspiece
 app.directive('chesspiece', ['$document', function($document) {
     return function(scope, element, attr) {
@@ -32,13 +32,14 @@ app.directive('chesspiece', ['$document', function($document) {
 		//pieces redrawn
       });
 	  
-	  element.on('dragstart', function(event) {
+	  element.on('dragstart', function(event,ui) {
 		//notify movement, set metadata
 		var piece = element[0].id;
-		var parent = element[0].parentNode.id;			
+		var parent = ($(ui.helper).data('start') === undefined) ? element[0].parentNode.id : $(ui.helper).data('start');
 
 		scope.$apply(function(){
-			scope.AppendLog(piece + parent);
+			scope.PickUp(piece,parent);
+			scope.AppendLog("picked up a "+ piece);
 		})
       });
 	  
@@ -49,30 +50,94 @@ app.directive('boardspace', ['$document', function($document) {
     return function(scope, element, attr) {
       var startX = 0, startY = 0, x = 0, y = 0;
 
-      element.on('drop', function(event) {
+      element.on('drop', function(event,ui) {
 		//piece dropped
 		var endPoint = element[0].id;
 		
+		//alert($(ui.helper).data('start'))
 		scope.$apply(function(){
+			scope.MoveTo(endPoint);
 			scope.AppendLog(" dropped on " + endPoint);
 		})
       });
     };
   }]); 
+ 
+app.directive( 'autoscroll', function() {
+
+    return {
+        link: function( scope, elem, attrs ) {
+
+            scope.$watch( function() {
+                elem.scrollTop(elem[0].scrollHeight);
+            } );
+        }
+    }
+
+} )
+	
+ app.filter('reverse', function() {
+  return function(items) {
+    return items.slice().reverse();
+  };
+}); 
+
+ app.filter('onlyShowLast', function() {
+  return function(items, showAmount) {
+    return items.slice(-showAmount);
+  };
+}); 
+
+ app.filter('popOffLast', function() {
+  return function(items, showAmount) {
+  if(items.length > showAmount){
+	items.shift();
+  }
+    return items
+  };
+}); 
 
 //build table
 app.controller('TableCtrl', function($scope,$interval) {
 		var column = "ABCDEFGH";
 		var square;
-		var piece;
+		$scope.pickeduppiece = emptyPiece;
 		
 
 		$scope.logText = "";
-		$scope.logData = "";
+		$scope.eventlog	={
+			Data: [],
+		}
 		$scope.AppendLog = function(newText){
-			$scope.logData+=newText
+			$scope.eventlog.Data.push(newText);
 		}
 		
+		$scope.PickUp = function(pc,origin)
+		{
+			$scope.pickeduppiece = pc.split('-')[2] + "_" + origin.slice(-2);
+			$scope.logData+= $scope.pickeduppiece
+		}
+		
+		$scope.MoveTo = function(dest)
+		{
+			var start; var end; var x; var y;
+			if($scope.pickeduppiece != emptyPiece)
+			{
+				start = $scope.pickeduppiece.slice(-2);
+				x = column.indexOf(start[0]);
+				y = start[1] - 1;
+				end = dest.slice(-2);
+				x = column.indexOf(end[0]);
+				y = end[1] - 1;
+				$scope.AppendLog(" moved "+ start + " to " + end);
+			}
+			
+			$scope.pickeduppiece = emptyPiece;
+		}
+		
+		$scope.PlaceChessObj = function(pieceObj,x,y) {
+				$scope.BoardState.Board[y][x] = pieceObj;
+		};
 		
 		$scope.BoardState = {
 			TurnState: "White",
@@ -101,19 +166,19 @@ app.controller('TableCtrl', function($scope,$interval) {
 				else{
 					square = "Silver"
 				}
-					
-				pieceObj = $scope.BoardState.Board[y][x]
+				
 				$scope.data[y][x] = { 
-									  uid: column[x] + (y+1),
-									  piece: pieceObj,
-									  bgcolor: square,
+					  col: column[x],
+					  uid: column[x] + (y+1),
+					  piece: $scope.BoardState.Board[y][x],
+					  bgcolor: square,
 				}
+
 			}
 		}
-		
-	$scope.$watchCollection('logData', function () {
-        $scope.logText = $scope.logData;
-    });
 
+	$scope.$watch('BoardState.Board', function () {
+		$( ".dragme" ).draggable({opacity: 0.6,snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid" });
+    },true);
 		
 	});

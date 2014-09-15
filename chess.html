@@ -10,6 +10,7 @@
 	  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
 	  <script src="scripts/jquery.ui.touch-punch.min.js"></script>
       <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular.min.js"></script>
+	   <script type='text/javascript' src="https://code.angularjs.org/1.2.9/angular-animate.min.js"></script>
 	  <script type='text/javascript' src="scripts/gametime.js"></script>
 	  
 	  <style>
@@ -24,6 +25,8 @@
 			float:left;
 			border: 1px solid black;
 			width: 320px;
+			height:500px;
+			overflow:auto;
 			margin: 30px 10px;
 			border-spacing: 5px;
 			padding: 4px;
@@ -71,6 +74,19 @@
 
 		}
 
+.reveal-animation.ng-enter {
+  -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
+  animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+}
+@-webkit-keyframes enter_sequence {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+@keyframes enter_sequence {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+
 		</style>
 		
   <script>
@@ -95,11 +111,13 @@
 <div ng-controller="TableCtrl" id="wrapper">
 <table class="boardTable" >
 <tr ng-repeat="row in data" >
-<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="piece-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
+<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.col}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
 </tr>
 </table>
-<div class = "log" ng-model="logData">
-  {{logText}}
+<div autoscroll class = "log">
+<ul>
+<li class="reveal-animation" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
+</ul>
 </div>
   
 </div>
