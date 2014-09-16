@@ -17,12 +17,33 @@ var Piece = function(color, type){
 	this.symbol = chessSymbol[type];
 }
 
-var autoMovePiece = function(p, e) //jquery handler to move piece
+var autoMovePiece = function(data) //jquery handler to move piece
 {
+	var p = $("#"+data.piece);
+	var e = $("#"+data.dropped);
+	var o = p.parent();
+	
 	p.animate({
 		//css
-		top:e.position().top,
-		left:e.position().left
+		top:e.position().top - o.position().top,
+		left:e.position().left - o.position().left
+		}, 300, function() {
+			//done
+		});
+	
+	p.data('start',data.dropped);
+}
+
+var removePieceFromGame = function(data)
+{
+	var p = $("#"+data.piece);
+	var e = $("#"+data.dropped);
+	var o = p.parent();
+	
+	p.animate({
+		//css
+		top:e.position().top - o.position().top,
+		left:e.position().left - o.position().left
 		}, 300, function() {
 			//done
 		});
@@ -37,6 +58,7 @@ app = angular.module('chessModule', ['ngAnimate']);
 app.controller('TableCtrl', function($scope,socket) {
 		var column = "ABCDEFGH";
 		var square;
+		$scope.loaded = 0;
 		$scope.pickeduppiece = emptyPiece;
 		$scope.username = "";
 		$scope.typedInChat = "";
@@ -45,20 +67,25 @@ app.controller('TableCtrl', function($scope,socket) {
 			console.log(data);
 			$scope.eventlog.Data.push(data["hello"])
 			socket.emit('ack-event', "ok");
+						$scope.loaded = 1;
 		});
 		
 		socket.on('logUpdate', function(data){
 			$scope.eventlog.Data.push("Someone " + data);
+
 			//socket.emit('ack-event', "ok");
 		});
 
 		
 		socket.on('game:move_sync', function(data){
-				var pieceObj = $("#"+data["piece"]);
-				var remoteCellObj = $("#"+data["dropped"]);
-				console.log (":)");
-				console.log(data);
-				autoMovePiece(pieceObj, remoteCellObj);
+				//console.log(data);
+				autoMovePiece(data);
+		});
+		
+		socket.on('game:piece_captured', function(data){
+				//console.log(data);
+				$scope.eventlog.Data.push("A " + data.piece.type + " was captured!");
+				socket.emit('game:board_sync_request', "ok");
 		});
 		
 		socket.on('chat:push', function(data){
@@ -93,17 +120,26 @@ app.controller('TableCtrl', function($scope,socket) {
 		
 		$scope.MoveTo = function(dest)
 		{
-			var start; var end; var x; var y;
+			var start; var end; var origin_x; var origin_y; var drop_x; var drop_y;
 			if($scope.pickeduppiece != emptyPiece)
 			{
 				start = $scope.pickeduppiece['origin'].slice(-2);
-				x = column.indexOf(start[0]);
-				y = start[1] - 1;
+				origin_x= column.indexOf(start[0]);
+				origin_y = start[1] - 1;
 				end = dest.slice(-2);
-				x = column.indexOf(end[0]);
-				y = end[1] - 1;
+				drop_x = column.indexOf(end[0]);
+				drop_y = end[1] - 1;
 				if(start!=end) $scope.AppendLog("moved "+ start + " to " + end);
-		        socket.emit('game:move_complete',{ piece: $scope.pickeduppiece.piece, origin: $scope.pickeduppiece.origin, dropped: dest });
+				
+				//do a little processing for server
+		        socket.emit('game:move_complete',{ piece: $scope.pickeduppiece.piece, 
+												   origin: { cell: $scope.pickeduppiece.origin, 
+															 x: origin_x,
+															 y: origin_y },
+												   dropped: { cell: dest,
+															  x: drop_x,
+															  y: drop_y  }
+												 });
 			}
 			
 			$scope.pickeduppiece = emptyPiece;
@@ -127,44 +163,38 @@ app.controller('TableCtrl', function($scope,socket) {
 			
 		}
 		$scope.data= []
-
+		for(i=0; i<8; i++)
+			$scope.data[i] = [];
 
 		socket.on('game:board_sync', function(sData){
-			console.log("Synced");
-			$scope.BoardState = sData;
-			
-			
-		});
-	
-		for(i=0; i<8; i++)
-			$scope.data[i] = []
-
-		for(y=0; y<8; y++)
-		{
-			for(x=0;x<8;x++)
+			console.log("Synced!");
+			$scope.BoardState = sData;			
+			console.log(sData);
+			for(y=0; y<8; y++)
 			{
-				if((x + y)%2)
+				for(x=0;x<8;x++)
 				{
-					square = "Gray"
-				}
-				else{
-					square = "Silver"
-				}
-				
-				$scope.data[y][x] = { 
-					  col: column[x],
-					  uid: column[x] + (y+1),
-					  piece: $scope.BoardState.Board[y][x],
-					  bgcolor: square,
-				}
+					if((x + y)%2)
+					{
+						square = "Gray"
+					}
+					else{
+						square = "Silver"
+					}
+					
+					$scope.data[y][x] = { 
+						  col: column[x],
+						  uid: column[x] + (y+1),
+						  piece: $scope.BoardState.Board[y][x],
+						  bgcolor: square
+					}
 
+				}
 			}
-		}
-
-	$scope.$watch('BoardState.Board', function () {
-		$( ".dragme" ).draggable({opacity: 0.6,snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid" });
-    },true);
-	
+		});
+    $scope.RequestReset = function(){
+		socket.emit('game:board_reset_request',0);
+	}
 	$scope.checkKeyPress = function(e){
 		if(e.which == 13 && $scope.typedInChat != ""){
 			socket.emit('chat:incoming', {message: $scope.typedInChat});

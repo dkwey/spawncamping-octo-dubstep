@@ -16,32 +16,40 @@
 	  <script type='text/javascript' src="scripts/gt_directives.js"></script>
 	  <script type='text/javascript' src="scripts/gt_filters.js"></script>
 	  <script type='text/javascript' src="scripts/socket.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Roboto:400,300italic,400italic,500italic' rel='stylesheet' type='text/css'>
 	  
 	  <style>
 		body {
-			font-family: Helvetica, Arial, sans-serif;
+			font-family: 'Roboto', sans-serif;
+			font-weight: 100;
 		}
 		#wrapper{
 			margin: 30px auto;
 			width: 989px;
 		}
+		.ng-hide-add, .ng-hide-remove {
+			/* ensure visibility during the transition */
+			display: block !important; /* yes, important */
+		}
 		.chatbox
 		{
-			float:left;
+			float:right;
 			border: 1px solid black;
 			width: 320px;
-			margin: 30px 10px;
+			margin: 20px 10px;
+			margin-bottom: 0px;
 			border-spacing: 5px;
 			padding: 4px;
 			box-shadow: 2px 2px 3px #aaaaaa;
 		}
 		.log{
-			height:700px;
+			height:709px;
 			overflow:auto;
+			word-wrap: break-word;
 		}
 		#typehere{
 			margin: 0px -4px;
-			font-size: 12px;
+			font-size: 13px;
 			height:20px;
 			padding: 3px 5px;
 			width:316px;
@@ -56,9 +64,9 @@
 		}
 		
 		.chatbox ul{
-			list-style-type: circle;
+			list-style-type: none;
 			font-size:12px;
-			margin-left: 10px;
+			margin-left: 0px;
 			margin-right: 0px;
 			padding-left: 20px;
 			padding-right: 20px;
@@ -69,9 +77,92 @@
 			text-align: center;
 			border: 3px solid black;
 			border-spacing: 5px;
-			margin: 30px 10px;
-						box-shadow: 2px 2px 3px #aaaaaa;
+			margin: 5px 5px;
+			margin-bottom: 0px;
+			box-shadow: 2px 2px 3px #aaaaaa;
 			padding: 4px;
+		}
+		
+		#reset-button{
+			cursor:pointer;
+			margin-left:540px;
+			background-color: OrangeRed;
+			margin-bottom:30px;
+			float:left; 
+			font-weight:300; 
+			font-style: italic; 
+			text-align:center; padding:5px; color: white; width:50px; 
+			//border-bottom: 1px solid orange;
+			z-index:99;
+			text-shadow: #555 1px 1px 1px;
+			box-shadow: 2px 2px 3px #DDD;
+			border-bottom-left-radius: 10%;
+			border-bottom-right-radius: 10%;
+		}
+		
+		#handle-input{
+			cursor:pointer;
+			background-color: red;
+			font-size:14px;
+			width:290px;
+			height:100px;
+			margin-top: -1px;
+			margin-bottom:30px;
+			margin-right: 10px;
+			float:right; 
+			font-weight:300; 
+			//font-style: italic; 
+			text-align:center; padding:20px; color: white;
+			border-top: 1px solid black;
+
+			text-shadow: #555 1px 1px 1px;
+			box-shadow: 2px 2px 1px #DDD;
+			box-shadow: 1px 5px 3px #CCC;
+		}
+		
+		#handle-input input{
+			margin-left:10px;
+
+
+			outline:0; 
+
+		}
+		
+		#icon-container{
+			border-radius:50%;
+			font-size:60px;
+			line-height:70px;
+			text-align:center;
+			width:75px;
+			height:75px;
+			background: white;
+			border: 1px solid Coral;
+			margin:-30px;
+			float:left;
+			text-shadow: #aaa 1px 1px 1px;
+			padding: 15px;
+			cursor: default;
+		}
+		
+		div#notification-bar{
+			float:left;
+			width:610px;
+			background-color:Coral;
+			//border: 3px solid blue;
+			margin: 20px 5px;
+			box-shadow: 2px 2px 10px #aaaaaa;
+			padding: 4px;
+		}
+		
+		#notification-bar h1{
+			color:white;
+			float:left;
+			margin-left: 50px;
+			font-size: 36px;
+			font-family: 'Roboto', sans-serif;
+			font-weight: 500;
+			font-style: italic;
+			text-shadow: red 1px 2px, DarkOrange 2px 2px;
 		}
 				
 		td{
@@ -96,7 +187,7 @@
 		}
 		.dragme{
 			cursor: pointer;
-			position:absolute;
+			z-index: 0;
 			/*background-color: red;*/
 		}
 		.snapto{
@@ -107,69 +198,88 @@
 
 		}
 
-		.animate.ng-enter {
-		  -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
-		  animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+		.slide-animate{
+		  -webkit-animation: redflash 1s linear; /* Safari/Chrome */
+		  animation: redflash 1s linear; /* IE10+ and Future Browsers */
+
 		}
-		.animate.ng-leave{
-		  -webkit-animation: enter_sequence 1s linear; /* Safari/Chrome */
-		  animation: enter_sequence 1s linear; /* IE10+ and Future Browsers */
+		.slide-animate.ng-hide{
+		  -webkit-animation: fade 1s linear; /* Safari/Chrome */
+		  animation: fade 1s linear; /* IE10+ and Future Browsers */
 		}
 		
-		@-webkit-keyframes enter_sequence {
+		.animate.ng-enter {
+		  -webkit-animation: redflash 1s linear; /* Safari/Chrome */
+		  animation: redflash 1s linear; /* IE10+ and Future Browsers */
+		}
+		.animate.ng-leave{
+		  -webkit-animation: redflash 1s linear; /* Safari/Chrome */
+		  animation: redflash 1s linear; /* IE10+ and Future Browsers */
+		}
+		
+		@-webkit-keyframes redflash {
 		  from { background-color: red; opacity:.1; }
 		  to { opacity:1; }
 		}
-		@keyframes enter_sequence {
+		@keyframes redflash {
 		  from { background-color: red; opacity:0; }
 		  to { opacity:1; }
 		}
 		
-		</style>
-		
-  <script>
-  $(function() {
-
-	
-    $( ".dragme" ).draggable({opacity: 0.6,
-						snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid", 
-						create: function(e,ui){     
-							var jObj = $("#"+e.delegateTarget.id);
-							jObj.css("top",jObj.position().top).css("left",jObj.position().left); 
-						} 
-	});
-	
-	$( ".dragme" ).on('dragstart',function(e,ui){
-		if(ui.helper.data('id') === undefined) {
-			ui.helper.data('start',e.delegateTarget.parentNode.id);
-		    ui.helper.data('id',e.delegateTarget.id);
+		@-webkit-keyframes fade {
+		  from {opacity:1; }
+		  to { opacity:0; }
 		}
-	});
-
-	$( ".snapto" ).droppable({hoverClass: "ui-state-hover"});
-	$( ".snapto" ).on('drop',function(e,ui){
-		ui.helper.data('start',e.delegateTarget.id);		
-	});
-  });
-  </script>
+		@keyframes fade {
+		  from {  opacity:1; }
+		  to { opacity:0; }
+		}
+		
+		</style>
+  <script type="text/javascript">
+		$(document).ready(function(){
+		var blinky = $( "#icon-container");
+		var originalColor = blinky.css("color");
+			$("#notification-bar").mouseenter(function(e) {
+				blinky.animate({
+					'color':'#222',
+					'background-color':'#EEE'
+				}, 500).effect( "shake" ,{ 'distance': 1 } , 500 );
+			}).mouseleave(function(e) {
+				blinky.clearQueue();
+				blinky.animate({
+					'color':'black',
+					'background-color':'white'
+				}, 500);
+			});
+			
+		});
+  </script>  
   </head>
   <body ng-app=chessModule>
 <div ng-controller="TableCtrl" id="wrapper">
-<table class="boardTable" >
+<div id="notification-bar">
+<div id="icon-container">♞</div>
+<h1>CHESS-BLA$TER 5000</h1>
+</div>	  
+
+<div class = "chatbox">
+	<div autoscroll class = "log">
+	<ul>
+	<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
+	</ul>
+	</div>
+	<div id="chatbox-sep"></div>
+	<input ng-model="typedInChat" type="textbox" id="typehere" ng-keypress="checkKeyPress($event)"></input>
+</div>
+<div ng-hide="loaded" class="boardTable" style="width:600px;height:600px;"><div style="margin:200px auto;">Loading... </div></div>
+<table ng-show="loaded" class="boardTable">
 <tr ng-repeat="row in data" >
-<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.col}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
+<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.uid}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
 </tr>
 </table>
-	<div class = "chatbox">
-		<div autoscroll class = "log">
-		<ul>
-		<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
-		</ul>
-		</div>
-		<div id="chatbox-sep"></div>
-		<input ng-model="typedInChat" type="textbox" id="typehere" ng-keypress="checkKeyPress($event)"></input>
-	</div>
-	  
+<div ng-show="loaded" gotreset id="reset-button" >Reset</div>
+<div ng-show="0" class='slide-animate' id="handle-input" >Enter handle: <input type="textbox" id="chat-handle"/></div>
 </div>
   </body>
 </html>
