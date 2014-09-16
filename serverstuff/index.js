@@ -19,6 +19,7 @@ var Piece = function(color, type){
 	this.color = color;
 	this.type = type;
 	this.symbol = chessSymbol[type];
+	this.uid = -1;
 }
 
 var emptyPiece = new Piece("empty","empty");
@@ -37,6 +38,16 @@ var ResetBoard = function(b){
 					[new Piece("black","rook"), new Piece("black","knight"), new Piece("black","bishop"), new Piece("black","queen"), new Piece("black","king"), new Piece("black","bishop"), new Piece("black","knight"), new Piece("black","rook")]]
 			
 		}
+		
+		var i = 0;
+		boardState[b].Board.forEach(function(entry) {
+			entry.forEach(function(pc) {
+					pc.uid = i++;
+			});
+			console.log(entry)
+		});
+		
+		
 };
 
 //initial board;
@@ -90,7 +101,11 @@ io.sockets.on('connection', function(socket) {
 	 var movedPiece = boardState[id].Board[data.origin.y][data.origin.x];
 	 var dropSpace = boardState[id].Board[data.dropped.y][data.dropped.x];
 	 console.log(movedPiece.color + " VS " + dropSpace.color);
-	 if(movedPiece.color === dropSpace.color)
+	 if(movedPiece.type == emptyPiece.type)
+	 {
+		io.sockets.emit('game:board_sync', boardState[0]);
+	 }
+	 else if(movedPiece.color === dropSpace.color)
 	 {
 		socket.emit('game:move_sync', { piece: data.piece,
 									origin: data.dropped.cell,

@@ -155,9 +155,10 @@
 		}
 		
 		#notification-bar h1{
+		text-align: center;
 			color:white;
 			float:left;
-			margin-left: 50px;
+			margin-left: 60px;
 			font-size: 36px;
 			font-family: 'Roboto', sans-serif;
 			font-weight: 500;
@@ -187,7 +188,12 @@
 		}
 		.dragme{
 			cursor: pointer;
-			z-index: 0;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
 			/*background-color: red;*/
 		}
 		.snapto{
@@ -260,7 +266,7 @@
 <div ng-controller="TableCtrl" id="wrapper">
 <div id="notification-bar">
 <div id="icon-container">♞</div>
-<h1>CHESS-BLA$TER 5000</h1>
+<h1>MASS CHESS-BLA$TER 40000</h1>
 </div>	  
 
 <div class = "chatbox">
@@ -275,7 +281,7 @@
 <div ng-hide="loaded" class="boardTable" style="width:600px;height:600px;"><div style="margin:200px auto;">Loading... </div></div>
 <table ng-show="loaded" class="boardTable">
 <tr ng-repeat="row in data" >
-<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.uid}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
+<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.piece.uid}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
 </tr>
 </table>
 <div ng-show="loaded" gotreset id="reset-button" >Reset</div>

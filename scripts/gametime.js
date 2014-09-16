@@ -15,6 +15,7 @@ var Piece = function(color, type){
 	this.color = color;
 	this.type = type;
 	this.symbol = chessSymbol[type];
+	this.uid = -1;
 }
 
 var autoMovePiece = function(data) //jquery handler to move piece
