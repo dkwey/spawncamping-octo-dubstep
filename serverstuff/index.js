@@ -1,5 +1,4 @@
-var io = require('socket.io').listen(443);
-var plural =""
+var io = require('socket.io').listen(9001);
 var userTable = []
 var boardState = []
 
@@ -60,15 +59,14 @@ io.sockets.on('connection', function(socket) {
 		return el == "unnamed"+i;
 	});
 	if(!userAlreadyExists) break;
-	
   }
   socket.username = "unnamed"+i;
   userTable.push(socket.username);
   var userCount = userTable.length;
   	console.log(userTable);
-  plural = (userCount==1)? "" : "s";
-  socket.emit('news', {hello: 'Welcome! Currently '+userCount+' player'+plural+' connected!' });
-  socket.broadcast.emit('user:connected', userCount);
+
+  socket.emit('news', {hello: 'Connected to MMO Chess server as '+socket.username+'!', username: socket.username });
+  io.sockets.emit('user:connected', userCount);
   console.log("^ " + userCount);
   
  console.log(socket.username + "synced");
@@ -78,8 +76,27 @@ io.sockets.on('connection', function(socket) {
     console.log(data);
   });
   
+  socket.on('chat:request_nick', function(data) {
+	  var nickAvailable = ( userTable.indexOf(data) == -1);
+
+	  if(nickAvailable){
+	  
+	    var uIndex = userTable.indexOf(socket.username);
+		if(uIndex!= -1) userTable.splice(uIndex,1);
+		userTable.push(data);
+		
+		io.sockets.emit('logUpdate', {message: " changed their name to " + data, user:socket.username});
+		
+		socket.username = data;
+	  }
+	  
+	  socket.emit('chat:request_nick_result', { 'nickAvailable' : nickAvailable, 'username' : socket.username });
+	  console.log(userTable.indexOf(data) == -1);
+	  
+  });
+  
   socket.on('log:push', function(data) {
-     socket.broadcast.emit('logUpdate', data);
+     socket.broadcast.emit('logUpdate', {message: data, user:socket.username});
 	 console.log(data);
   });
   

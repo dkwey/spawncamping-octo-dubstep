@@ -31,6 +31,11 @@ var autoMovePiece = function(data) //jquery handler to move piece
 		}, 300, function() {
 			//done
 		});
+		
+	p.animate({ color: "#FF9999", easing: 'easeInOutCubic'}, 100 );
+		console.log(data.dropped);
+	p.animate({ color: data.piece.split('-')[1], easing: 'easeInOutCirc'}, 250 );	
+	e.parent().effect('highlight',{'color':'red'},500);
 	
 	p.data('start',data.dropped);
 }
@@ -60,21 +65,25 @@ app.controller('TableCtrl', function($scope,socket) {
 		var column = "ABCDEFGH";
 		var square;
 		$scope.loaded = 0;
+		$scope.login = 0;
 		$scope.pickeduppiece = emptyPiece;
+		
 		$scope.username = "";
 		$scope.typedInChat = "";
+		
+		$scope.chatNotification = "";
 			
 		socket.on('news', function(data){
 			console.log(data);
 			$scope.eventlog.Data.push(data["hello"])
+			$scope.username = data["username"];
 			socket.emit('ack-event', "ok");
-						$scope.loaded = 1;
+			$scope.loaded = 1;
+			$scope.login = 0;
 		});
 		
 		socket.on('logUpdate', function(data){
-			$scope.eventlog.Data.push("Someone " + data);
-
-			//socket.emit('ack-event', "ok");
+			$scope.eventlog.Data.push(data.user + " " + data.message);
 		});
 
 		
@@ -95,11 +104,14 @@ app.controller('TableCtrl', function($scope,socket) {
 		});
 		
 		socket.on('user:connected', function(data){
-			$scope.eventlog.Data.push(data + " users now connected.");
+			plural = (data==1)? "" : "s";
+			$scope.chatNotification = (data + " player"+plural+" connected.");
 		});
 		
-		socket.on('user:disconnect', function(data){
-			$scope.eventlog.Data.push(data + " users now connected.");
+		socket.on('user:disconnected', function(data){
+			plural = (data==1)? "" : "s";
+			$scope.chatNotification = (data + " player"+plural+" connected.");
+			console.log(data);
 		});
 		
 
@@ -115,7 +127,7 @@ app.controller('TableCtrl', function($scope,socket) {
 		$scope.PickUp = function(pc,org)
 		{
 			$scope.pickeduppiece = { piece: pc, origin: org };
-			console.log($scope.pickeduppiece);
+			//console.log($scope.pickeduppiece);
 			$scope.logData+= pc.split('-')[0] + "_" + pc.split('-')[2] + "_" + org.slice(-2)
 		}
 		
@@ -170,7 +182,7 @@ app.controller('TableCtrl', function($scope,socket) {
 		socket.on('game:board_sync', function(sData){
 			console.log("Synced!");
 			$scope.BoardState = sData;			
-			console.log(sData);
+			//console.log(sData);
 			for(y=0; y<8; y++)
 			{
 				for(x=0;x<8;x++)
@@ -193,9 +205,32 @@ app.controller('TableCtrl', function($scope,socket) {
 				}
 			}
 		});
+		
+		socket.on('chat:request_nick_result', function(data){
+			if(data.nickAvailable)
+			{
+				$scope.username = data.username;
+				$scope.loginErr = "";
+				$scope.login = 1;
+			}
+			else{
+				$scope.loginErr = "Username not available!";
+			}
+		});
     $scope.RequestReset = function(){
 		socket.emit('game:board_reset_request',0);
 	}
+	
+	$scope.SetNick = function(){
+		if($scope.newusername != undefined && $scope.newusername.length > 1)
+		{
+			socket.emit('chat:request_nick', $scope.newusername);
+		}
+		else{
+			$scope.loginErr = "Bad username!";
+		}
+	}
+	
 	$scope.checkKeyPress = function(e){
 		if(e.which == 13 && $scope.typedInChat != ""){
 			socket.emit('chat:incoming', {message: $scope.typedInChat});

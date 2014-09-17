@@ -25,19 +25,42 @@
 		}
 		#wrapper{
 			margin: 30px auto;
-			width: 989px;
+			width: 975px;
 		}
-		.ng-hide-add, .ng-hide-remove {
-			/* ensure visibility during the transition */
-			display: block !important; /* yes, important */
+		.left-side-wrapper{
+			float:left;
+			width:619px;
 		}
+		.right-side-wrapper{
+			float:right;
+			width:330px;
+			margin: 20px auto;
+			
+		}
+		
+		.login-button-container
+		{
+			margin:0 auto;
+			width:250px;
+		}
+		.login-button{
+			font-family: 'Roboto', sans-serif;
+			font-weight:300; 
+			font-style: italic; 
+			margin:5px;
+			padding: 5px 10px;
+			background-color: Coral;
+			color:white;
+			border:none;
+		}
+		.login-button:hover{
+			background-color: #EE6F40;
+		}
+
 		.chatbox
 		{
-			float:right;
 			border: 1px solid black;
 			width: 320px;
-			margin: 20px 10px;
-			margin-bottom: 0px;
 			border-spacing: 5px;
 			padding: 4px;
 			box-shadow: 2px 2px 3px #aaaaaa;
@@ -82,50 +105,33 @@
 			box-shadow: 2px 2px 3px #aaaaaa;
 			padding: 4px;
 		}
-		
+
 		#reset-button{
 			cursor:pointer;
-			margin-left:540px;
 			background-color: OrangeRed;
 			margin-bottom:30px;
-			float:left; 
+			margin-right:18px;
+			float:right; 
 			font-weight:300; 
 			font-style: italic; 
-			text-align:center; padding:5px; color: white; width:50px; 
-			//border-bottom: 1px solid orange;
-			z-index:99;
+			text-align:center; padding:5px; color: white; width:50px;
 			text-shadow: #555 1px 1px 1px;
 			box-shadow: 2px 2px 3px #DDD;
 			border-bottom-left-radius: 10%;
 			border-bottom-right-radius: 10%;
 		}
 		
-		#handle-input{
-			cursor:pointer;
-			background-color: red;
-			font-size:14px;
-			width:290px;
-			height:100px;
-			margin-top: -1px;
-			margin-bottom:30px;
-			margin-right: 10px;
-			float:right; 
-			font-weight:300; 
-			//font-style: italic; 
-			text-align:center; padding:20px; color: white;
-			border-top: 1px solid black;
-
-			text-shadow: #555 1px 1px 1px;
-			box-shadow: 2px 2px 1px #DDD;
-			box-shadow: 1px 5px 3px #CCC;
-		}
+		#chat-notify{
 		
-		#handle-input input{
-			margin-left:10px;
-
-
-			outline:0; 
-
+			float:right; 
+			cursor:pointer;
+			font-size:14px;
+		    padding: 5px 0px;
+			margin-bottom:30px;
+			font-weight:300;
+			text-align:center;
+			color: black;
+			text-shadow: #BBB 1px 1px 1px;
 		}
 		
 		#icon-container{
@@ -148,7 +154,6 @@
 			float:left;
 			width:610px;
 			background-color:Coral;
-			//border: 3px solid blue;
 			margin: 20px 5px;
 			box-shadow: 2px 2px 10px #aaaaaa;
 			padding: 4px;
@@ -193,8 +198,7 @@
 			-khtml-user-select: none;
 			-moz-user-select: none;
 			-ms-user-select: none;
-			user-select: none;
-			/*background-color: red;*/
+
 		}
 		.snapto{
 			margin: 0px auto;
@@ -205,13 +209,21 @@
 		}
 
 		.slide-animate{
-		  -webkit-animation: redflash 1s linear; /* Safari/Chrome */
-		  animation: redflash 1s linear; /* IE10+ and Future Browsers */
-
+		  -webkit-animation: fadeIn .2s linear; /* Safari/Chrome */
+		  animation: fadeIn 1s linear; /* IE10+ and Future Browsers */
 		}
 		.slide-animate.ng-hide{
 		  -webkit-animation: fade 1s linear; /* Safari/Chrome */
 		  animation: fade 1s linear; /* IE10+ and Future Browsers */
+		}
+		
+		.fadeIn-animate{
+		  -webkit-animation: fadeIn .2s linear; /* Safari/Chrome */
+		  animation: fadeIn 1s linear; /* IE10+ and Future Browsers */
+		}
+		.fadeIn-animate.ng-hide{
+			/* fade instantly */
+			opacity:0; 
 		}
 		
 		.animate.ng-enter {
@@ -232,6 +244,16 @@
 		  to { opacity:1; }
 		}
 		
+		@-webkit-keyframes fadeIn {
+		  from {opacity:0; }
+		  to { opacity:1; }
+		}
+		@keyframes fadeIn {
+		  from {  opacity:0; }
+		  to { opacity:1; }
+		}
+		
+		
 		@-webkit-keyframes fade {
 		  from {opacity:1; }
 		  to { opacity:0; }
@@ -250,7 +272,7 @@
 				blinky.animate({
 					'color':'#222',
 					'background-color':'#EEE'
-				}, 500).effect( "shake" ,{ 'distance': 1 } , 500 );
+				}, 500).effect( "bounce" ,{ 'distance': 15 } , 500 );
 			}).mouseleave(function(e) {
 				blinky.clearQueue();
 				blinky.animate({
@@ -266,26 +288,43 @@
 <div ng-controller="TableCtrl" id="wrapper">
 <div id="notification-bar">
 <div id="icon-container">♞</div>
-<h1>MASS CHESS-BLA$TER 40000</h1>
+<h1>MMO CHESS-BLA$TER 40000</h1>
 </div>	  
 
-<div class = "chatbox">
-	<div autoscroll class = "log">
-	<ul>
-	<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
-	</ul>
+<div class="right-side-wrapper">
+	<div class = "chatbox">
+		<div autoscroll class = "log">
+		<ul>
+		<li class="animate" ng-repeat="line in eventlog.Data track by $index">{{line}}</li>
+		</ul>
+		</div>
+		<div id="chatbox-sep"></div>
+		<input ng-model="typedInChat" type="textbox" id="typehere" ng-keypress="checkKeyPress($event)"></input>
 	</div>
-	<div id="chatbox-sep"></div>
-	<input ng-model="typedInChat" type="textbox" id="typehere" ng-keypress="checkKeyPress($event)"></input>
+	<div ng-show="loaded" class='slide-animate' id="chat-notify" >{{chatNotification}}</div>
 </div>
-<div ng-hide="loaded" class="boardTable" style="width:600px;height:600px;"><div style="margin:200px auto;">Loading... </div></div>
-<table ng-show="loaded" class="boardTable">
-<tr ng-repeat="row in data" >
-<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.piece.uid}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
-</tr>
-</table>
-<div ng-show="loaded" gotreset id="reset-button" >Reset</div>
-<div ng-show="0" class='slide-animate' id="handle-input" >Enter handle: <input type="textbox" id="chat-handle"/></div>
+<div class="left-side-wrapper">
+	<table ng-show="login" class="fadeIn-animate boardTable">
+	<tr ng-repeat="row in data" >
+	<td ng-repeat="cell in row" class="{{cell.piece.color}}-piece" style="background-color: {{cell.bgcolor}}"><div boardspace class="snapto" id="cell-{{cell.uid}}"><div chesspiece ng-if="cell.piece.symbol!=chessSymbol.empty" class="dragme" id="{{cell.piece.uid}}-{{cell.piece.color}}-{{cell.piece.type}}">{{cell.piece.symbol}}</div></div></td>
+	</tr>
+	</table>
+	<div ng-hide="login" class="fadeIn-animate boardTable" style="width:605px;height:605px;">
+		<div style="margin:200px auto;">
+			<h2>Welcome to MMO Chess!</h2>
+			<div style = "padding:20px;">
+			Pick your handle: <input ng-model="newusername" type="textbox" id='user-id' />
+			<div style = "padding:10px; height:1em;">{{loginErr}}</div>
+			</div>
+			<div class="login-button-container">
+				<button ng-click="SetNick();" class="login-button">Go</button> <button ng-click="login=1" class="login-button">Continue as guest</button>
+			</div>
+		</div>
+	</div>
+	
+	<div ng-show="loaded" gotreset id="reset-button" class = "fadeIn-animate ">Reset</div>
+	
+</div>
 </div>
   </body>
 </html>

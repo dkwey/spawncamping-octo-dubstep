@@ -2,24 +2,23 @@
 app.directive('chesspiece', ['$document', function($document) {
     return function(scope, element, attr) {
       var startX, startY, x = 0, y = 0;
-
+	  var originalColor;
 	  element.draggable({opacity: 0.6,
 						snap: ".snapto", snapMode: "inner", snapTolerance: 20, revert: "invalid", 
 						create: function(e,ui){     
-							//initial drag apply
+
 						} 
 	});
 	  
-      element.on('dragcreate', function(event) {
-		//pieces redrawn
-		
-      });
+
 
 	  element.on('dragstart', function(event,ui) {
+
 		//notify movement, set metadata
 		if(ui.helper.data('id') === undefined) {
 			ui.helper.data('start',element[0].parentNode.id);
 		    ui.helper.data('id',element[0].id);
+			ui.helper.data('chess-color',element.css('color'));
 		}
 
 		var piece = element[0].id;
@@ -31,9 +30,10 @@ app.directive('chesspiece', ['$document', function($document) {
 		})
       });
 	  
-	  element.on('dragend', function(event,ui) {
+	  element.on('dragstop', function(event,ui) {
 		//notify movement, set metadata
-		
+		//element.animate({ color: "#55FF55", easing: 'easeInOutCubic'}, 250 );
+		//element.animate({ color: ui.helper.data('chess-color'), easing: 'easeInOutCirc'}, 250 );
       });
 	  
     };
@@ -48,12 +48,16 @@ app.directive('boardspace', ['$document', function($document) {
       element.on('drop', function(event,ui) {
 		//piece dropped
 		var endPoint = element[0].id;
-		ui.helper.data('start',endPoint); //reset start point
+		
+		if(ui.helper.data('start') != endPoint){
+			ui.helper.data('start',endPoint); //reset start point
 
-		scope.$apply(function(){
-			scope.MoveTo(endPoint);
-			scope.AppendLog("dropped on " + endPoint);
-		})
+			scope.$apply(function(){
+				scope.MoveTo(endPoint);
+				scope.AppendLog("dropped on " + endPoint);
+				element.parent().effect('highlight',500);
+			})
+		}
       });
     };
   }]); 
